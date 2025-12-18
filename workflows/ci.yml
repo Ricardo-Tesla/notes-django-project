@@ -1,1 +1,73 @@
 
+name: CI Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Run Backend & Frontend Tests
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: [3.11]
+        node-version: [20]
+
+    steps:
+      # ---------------- Step 1: Checkout code ----------------
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # ---------------- Step 2: Setup Python ----------------
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # ---------------- Step 3: Install Backend Dependencies ----------------
+      - name: Install backend dependencies
+        run: |
+          cd notes-backend
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-django
+
+      # ---------------- Step 4: Run Backend Migrations ----------------
+      - name: Apply migrations
+        run: |
+          cd notes-backend
+          python manage.py migrate
+
+      # ---------------- Step 5: Run Backend Tests ----------------
+      - name: Run backend tests
+        run: |
+          cd notes-backend
+          pytest
+
+      # ---------------- Step 6: Setup Node.js ----------------
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      # ---------------- Step 7: Install Frontend Dependencies ----------------
+      - name: Install frontend dependencies
+        run: |
+          cd notes-frontend
+          npm ci
+
+      # ---------------- Step 8: Lint Frontend ----------------
+      - name: Lint frontend
+        run: |
+          cd notes-frontend
+          npx eslint .
+
+      # ---------------- Step 9: Run Frontend Tests ----------------
+      - name: Run frontend tests
+        run: |
+          cd notes-frontend
+          npx vitest run
