@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-const API_URL = "http://localhost:8000/api/notes/";
+const API_URL = import.meta.env.VITE_API_URL;
 
 export default function App() {
   const [notes, setNotes] = useState([]);
@@ -127,3 +127,4 @@ export default function App() {
     </div>
   );
 }
+console.log("API_URL:", API_URL);
